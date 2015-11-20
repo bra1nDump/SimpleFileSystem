@@ -5,55 +5,99 @@
 
 #include "CFileSystem/CFileSystem.cpp"
 
-// Adding lines to files
-void test_2(CFileSystem* test_file_system) {
-	char buf[] = "Chicken pimp\n";
-
-	for (int i = 0; i < 10; ++i) {
-		int success = test_file_system->add_line_to_file(i, buf);
-
-		std::cout << "Adding line: " << buf
-			<< "To file: " << i << std::endl;
-		std::cout << "success: " << success << std::endl;
+// Create files
+void test_0(CFileSystem* test_file_system, int iterations) {
+	for (int i = 0; i < iterations; ++i) {
+		test_file_system->create_file();
 	}
-
-	test_file_system->dump();
 }
 
-// Create and delete files testing
-void test_1(CFileSystem* test_file_system) {
-	
-	for (int i = 0; i < 10; ++i) {
-		int id = test_file_system->create_file();
-
-		std::cout << "Creating file with id: " << id << std::endl;
+// Delete files
+void test_1(CFileSystem* test_file_system, int iterations, int range) {
+	for (int i = 0; i < iterations; ++i) {
+		int id = rand() % range;
+		test_file_system->delete_file(id);
 	}
+}
 
-	for (int i = 0; i < 15; ++i) {
-		int id = rand() % 10;
-		bool deleted = test_file_system->delete_file(id);
+// Adding lines to files
+void test_2(CFileSystem* test_file_system, int iterations, int range) {
+	char sample_line_0[] = "College sucks!\n";
+	char sample_line_1[] = "Chicken is a pimp\n";
+	char sample_line_2[] = "KKK  forever!\n";
+	char sample_line_3[] = "SWAGA bitch!\n";
 
-		if (deleted) {
-			std::cout << "File with id: " << id
-				<< " deleted successfully!" << std::endl;
-		} else {
-			std::cout << "File with id: " << id
-				<< " not found!" << std::endl;
+	char* sample_line;
+
+	for (int i = 0; i < iterations; ++i) {
+		switch(rand() % 4) {
+		case(0): { sample_line = sample_line_0; break; }
+		case(1): { sample_line = sample_line_1; break; }
+		case(2): { sample_line = sample_line_2; break; }
+		case(3): { sample_line = sample_line_3; break; }
 		}
-	}
 
-	test_file_system->dump();
+		int file_id = rand() % range;
+		
+		test_file_system->add_line_to_file(file_id, sample_line);
+	}
+}
+
+// Reading lines
+void test_3(CFileSystem* test_file_system, int iterations, int range) {
+	for (int i = 0; i < iterations; ++i) {
+		int file_id = rand() % range;
+
+		test_file_system->read_line(file_id);
+	}
+}
+
+void combined_test_0() {
+	printf("\n\n\n\n\n");
+	printf("#################combined_test_0####################\n");
+
+
+	printf("#######################end##########################\n");
+}
+
+void combined_test_1() {
+	printf("\n\n\n\n\n");
+	printf("#################combined_test_1####################\n");
+
+	CFileSystem test_file_system(8, 150);
+
+	test_0(&test_file_system, 3);
+	test_2(&test_file_system, 5, 1);
+	test_3(&test_file_system, 7, 1);
+
+	test_file_system.dump();
+
+	printf("#######################end##########################\n");
+}
+
+void combined_test_2() {
+	printf("\n\n\n\n\n");
+	printf("#################combined_test_2####################\n");
+
+	CFileSystem test_file_system(1, 150);
+
+	test_0(&test_file_system, 3);
+	test_2(&test_file_system, 3, 1);
+	test_3(&test_file_system, 7, 1);
+
+	test_file_system.dump();
+
+	printf("#######################end##########################\n");
 }
 
 int main() {
-	/* Intializes random number generator */
 	time_t t;
-   	srand((unsigned) time(&t));
+	srand((unsigned) time(&t));
 
-   	CFileSystem test_file_system(8, 40);
+	combined_test_1();
+	combined_test_2();
 
-	test_1(&test_file_system);
-	test_2(&test_file_system);
+
 
 	return 0;
 }

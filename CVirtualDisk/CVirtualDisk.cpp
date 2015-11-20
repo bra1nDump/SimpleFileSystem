@@ -19,7 +19,6 @@ class CVirtualDisk {
 
 public:
 //----------------------------------------------------------------------------------
-	// Virtual disk initializer (Begin work)
 	CVirtualDisk(int block_size, int disk_size):
 	BLOCK_SIZE_IN_BYTES(block_size),
 	DISK_SIZE_IN_BLOCKS(disk_size),
@@ -31,7 +30,6 @@ public:
 		}
 	}
 
-	// Virtual disk destructor (End work)
 	~CVirtualDisk() {
 		LOG("Deleting virtual disk...")
 
@@ -43,26 +41,24 @@ public:
 	}
 
 //----------------------------------------------------------------------------------
-	// Write #src_block to disk's block at index #index
-	bool write_block(const char* src_block, int index) {
-		LOG("Writing a new block to the virtual disk...")
+	bool write_block(const char* src_block, int id) {
+		LOG("Writing to block: " << id)
 
-		if (index >= DISK_SIZE_IN_BLOCKS) {
+		if (id >= DISK_SIZE_IN_BLOCKS) {
 			return false;
 		} else {
-			std::memcpy(base_[index], src_block, BLOCK_SIZE_IN_BYTES);
+			std::memcpy(base_[id], src_block, BLOCK_SIZE_IN_BYTES);
 			return true;
 		}
 	}
 
-	// Read disk's block at index #index to #dst_block
-	bool read_block(char* dst_block, int index) {
-		LOG("Reading a block from the virtual disk...")
+	bool read_block(char* dst_block, int id) const {
+		LOG("\nReading from block: " << id)
 
-		if (index >= DISK_SIZE_IN_BLOCKS) {
+		if (id >= DISK_SIZE_IN_BLOCKS) {
 			return false;
 		} else {
-			std::memcpy(dst_block, base_[index], BLOCK_SIZE_IN_BYTES);
+			std::memcpy(dst_block, base_[id], BLOCK_SIZE_IN_BYTES);
 			return true;
 		}
 	}
