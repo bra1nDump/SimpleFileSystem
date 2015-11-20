@@ -7,13 +7,11 @@
 #include <set>
 #include <map>
 
-#undef DEBUG_MODE
 #include "../CVirtualDisk/CVirtualDisk.cpp"
-#define DEBUG_MODE true
 #include "../CFile/CFile.cpp"
 
 //--------------------------< Debug macros >----------------------------------------
-#ifdef DEBUG_MODE
+#ifdef FILE_SYSTEM_DEBUG
 	#define LOG(TO_PRINT) std::cout << TO_PRINT << std::endl;
 #else
 	#define LOG(TO_PRINT)
@@ -40,7 +38,6 @@ class CFileSystem {
 
 public:
 //----------------------------------------------------------------------------------
-	// Initialize the file system
 	CFileSystem(int block_size = 256, int disk_size = 1024):
 	BLOCK_SIZE_IN_BYTES(block_size),
 	DISK_SIZE_IN_BLOCKS(disk_size),
@@ -54,7 +51,6 @@ public:
 		LOG("File system initialized successfully!\n")
 	}
 
-	// Destroy file system
 	~CFileSystem() {
 		LOG("Destroying file system...")
 

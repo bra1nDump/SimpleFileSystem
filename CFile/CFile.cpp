@@ -3,7 +3,7 @@
 #include "../CVirtualDisk/CVirtualDisk.cpp"
 
 //--------------------------< Debug macros >----------------------------------------
-#ifdef DEBUG_MODE
+#ifdef FILE_DEBUG
 	#define LOG(TO_PRINT) std::cout << TO_PRINT << std::endl;
 #else
 	#define LOG(TO_PRINT)
@@ -50,24 +50,24 @@ public:
 	info_(id),
 	disk_ptr_(disk_ptr),
 	BLOCK_SIZE_IN_BYTES(block_size) {
-		LOG("File created id: " << info_.file_id << std::endl)
+		LOG("File created id: " << info_.file_id << std::endl);
 	}
 
 	// Destroy file
 	~CFile() {
-		LOG("File deleted id: " << info_.file_id << std::endl)
+		LOG("File deleted id: " << info_.file_id << std::endl);
 	}
 
 	// Release used blocks
 	std::vector<int> used_blocks() {
-		LOG("Releasing blocks...")
+		LOG("Releasing blocks...");
 
 		return block_ids_;
 	}
 
 //----------------------------------------------------------------------------------
 	void add_block(int new_block_id) {
-		LOG("+ block with id: " << new_block_id)
+		LOG("+ block with id: " << new_block_id);
 
 		info_.number_of_blocks += 1;
 		info_.free_space       += BLOCK_SIZE_IN_BYTES;
@@ -76,12 +76,9 @@ public:
 	}
 
 	void add_line(char* new_line) {
-		dump();
+		LOG("+ line: " << new_line);
 
-		LOG("+ line:")
-		LOG(new_line);
-
-		char* final_line = new char[info_.end_pos + std::strlen(new_line) + 1];
+		char* final_line = new char[info_.end_pos + std::strlen(new_line) + BLOCK_SIZE_IN_BYTES];
 
 		// Append characters from end block of the file to the final line
 		disk_ptr_->read_block(final_line, block_ids_[info_.end_block]);
@@ -109,14 +106,14 @@ public:
 
 //----------------------------------------------------------------------------------
 	void set_cursor_begin() {
-		LOG("Setting cursor to the begining of the file")
+		LOG("Setting cursor to the begining of the file");
 
 		info_.cursor_block = 0;
 		info_.cursor_pos   = 0;
  	}
 
  	void set_cursor_end() {
- 		LOG("Setting cursor to the end of the file")
+ 		LOG("Setting cursor to the end of the file");
 
  		info_.cursor_block = info_.end_block;
  		info_.cursor_pos   = info_.end_pos;
@@ -124,15 +121,12 @@ public:
 
  //---------------------------------------------------------------------------------
 	void read_line() {
-		LOG("Reading line from file: " << info_.file_id << "\nStarting from:")
-		LOG("block: " << info_.cursor_block << "position: " << info_.cursor_pos)
-
 		if (info_.number_of_blocks == 0) {
-			LOG("Empty file!")
+			LOG("Empty file!");
 			return;
 		} else if ((info_.cursor_block == info_.end_block) &&
 			(info_.cursor_pos == info_.end_pos)) {
-				LOG("EOF!")
+				LOG("EOF!");
 				return;
 		}
 
@@ -203,8 +197,8 @@ public:
 			for (int j = 0; j < BLOCK_SIZE_IN_BYTES; ++j) {
 				printf("%c", buffer[j]);
 			}
+			std::cout << std::endl;
 		}
-
 		delete [] buffer;
 		std::cout << std::endl;
 		std::cout << "-------------< end of content >---------"    << std::endl;
