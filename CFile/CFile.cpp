@@ -1,5 +1,3 @@
-#include <list>
-
 #include "../CVirtualDisk/CVirtualDisk.cpp"
 
 //--------------------------< Debug macros >----------------------------------------
@@ -75,7 +73,7 @@ public:
 		block_ids_.push_back(new_block_id);
 	}
 
-	void add_line(char* new_line) {
+	void add_line(const char* new_line) {
 		LOG("+ line: " << new_line);
 
 		char* final_line = new char[info_.end_pos + std::strlen(new_line) + BLOCK_SIZE_IN_BYTES];
@@ -105,29 +103,52 @@ public:
  	}
 
 //----------------------------------------------------------------------------------
-	void set_cursor_begin() {
+ 	int is_empty() {
+ 		return (info_.end_block == 0 && info_.end_pos == 0);
+ 	}
+
+ 	int at_begin() {
+ 		return (info_.cursor_block == 0 && info_.cursor_pos == 0);
+ 	}
+
+ 	int at_end() {
+ 		return (info_.cursor_block == info_.end_block &&
+ 			info_.cursor_pos == info_.end_pos);
+ 	}
+
+	int set_cursor_begin() {
 		LOG("Setting cursor to the begining of the file");
+		if (info_.number_of_blocks == 0) {
+			return 0;
+		}
 
 		info_.cursor_block = 0;
 		info_.cursor_pos   = 0;
+
+		return 1;
  	}
 
- 	void set_cursor_end() {
- 		LOG("Setting cursor to the end of the file");
+	int set_cursor_end() {
+		LOG("Setting cursor to the end of the file");
+		if (info_.number_of_blocks == 0) {
+			return 0;
+		}
 
- 		info_.cursor_block = info_.end_block;
- 		info_.cursor_pos   = info_.end_pos;
- 	}
+		info_.cursor_block = info_.end_block;
+		info_.cursor_pos   = info_.end_pos;
 
- //---------------------------------------------------------------------------------
-	void read_line() {
+		return 1;
+	}
+
+//---------------------------------------------------------------------------------
+	int read_forward() {
 		if (info_.number_of_blocks == 0) {
 			LOG("Empty file!");
-			return;
+			return 0;
 		} else if ((info_.cursor_block == info_.end_block) &&
 			(info_.cursor_pos == info_.end_pos)) {
 				LOG("EOF!");
-				return;
+				return 0;
 		}
 
 		std::string line;
@@ -140,7 +161,7 @@ public:
 
 			for (; pos < BLOCK_SIZE_IN_BYTES; ++pos) {
 				if (block_buffer[pos] == '\n') {
-					goto break_loops;
+					goto exit_loops;
 				} else if (block_buffer[pos] == '\0') {
 					assert(0);
 				} else {
@@ -149,8 +170,7 @@ public:
 			}
 			pos = 0;
 		}
-		break_loops:
-		line += '\n';
+		exit_loops:
 
 		if (pos == BLOCK_SIZE_IN_BYTES - 1) {
 			info_.cursor_block = block + 1;
@@ -161,8 +181,78 @@ public:
 		}
 
 		std::cout << "Line from file: " << line << std::endl;
+		std::cout << line.length() << std::endl;
 
  		delete [] block_buffer;
+
+ 		return line.length();
+	}
+
+	int read_backward() {
+		if (info_.number_of_blocks == 0) {
+			LOG("Empty file!");
+			return 0;
+		} else if ((info_.cursor_block == 0) &&
+			(info_.cursor_pos == 0)) {
+				LOG("Can not read forward! Already in the begining of the file");
+				return 0;
+		}
+
+		std::string line;
+		char* block_buffer = new char[BLOCK_SIZE_IN_BYTES];
+
+		int block = info_.cursor_block;
+		int pos   = info_.cursor_pos;
+		switch (pos) {
+		case (0): {
+			if (BLOCK_SIZE_IN_BYTES != 1) {
+				block -= 1;
+				pos   = BLOCK_SIZE_IN_BYTES - 2;
+			} else {
+				block -= 2;
+				pos   = BLOCK_SIZE_IN_BYTES - 1;
+			}
+			break;
+		}
+		case (1): {
+			block -= 1;
+			pos   = BLOCK_SIZE_IN_BYTES - 1;
+			break;
+		}
+		default: {
+			pos -= 2;
+			break;
+		}
+		}
+
+		for (; block >= 0; --block) {
+			disk_ptr_->read_block(block_buffer, block_ids_[block]);
+
+			for (; pos >= 0; --pos) {
+				if (block_buffer[pos] == '\n') {
+					goto break_loops;
+				} else {
+					line += block_buffer[pos];
+				}
+			}
+			pos = BLOCK_SIZE_IN_BYTES - 1;
+		}
+		break_loops:
+
+		if (pos == BLOCK_SIZE_IN_BYTES - 1) {
+			info_.cursor_block = block + 1;
+			info_.cursor_pos   = 0;
+		} else {
+			info_.cursor_block = block;
+			info_.cursor_pos   = pos + 1;
+		}
+
+		std::cout << "Line from file: " << line << std::endl;
+		std::cout << line.length() << std::endl;
+
+ 		delete [] block_buffer;
+
+ 		return line.length();
 	}
 
 //----------------------------------------------------------------------------------
@@ -184,7 +274,7 @@ public:
 		std::cout << "end_pos          " << info_.end_pos          << std::endl;
 
 		std::cout << "block_ids_:      " << block_ids_.size()      << std::endl;
-		for (auto id: block_ids_) {
+		for (int& id: block_ids_) {
 			std::cout << id << " ";
 		}
 		std::cout << std::endl;

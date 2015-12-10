@@ -1,6 +1,6 @@
-//#define FILE_DEBUG
-//#define FILE_SYSTEM_DEBUG
-//#define VIRTUAL_DISK_DEBUG
+#define FILE_DEBUG
+#define FILE_SYSTEM_DEBUG
+#define VIRTUAL_DISK_DEBUG
 
 #include <stdlib.h>
 #include <time.h>
@@ -70,12 +70,12 @@ void combined_test_1() {
 	printf("\n\n\n\n\n");
 	printf("=================combined_test_1====================\n");
 
-	CFileSystem test_file_system(8, 150);
+	CFileSystem test_file_system(16, 20);
 
-	test_0(&test_file_system, 20);
-	test_1(&test_file_system, 5, 20);
-	test_2(&test_file_system, 5, 1);
-	test_3(&test_file_system, 7, 1);
+	test_0(&test_file_system, 4);
+	test_1(&test_file_system, 1, 4);
+	test_2(&test_file_system, 10, 4);
+	test_3(&test_file_system, 3, 1);
 
 	test_file_system.dump();
 
@@ -135,9 +135,9 @@ int main() {
 	srand((unsigned) time(&t));
 
 	combined_test_1();
-	combined_test_2();
-	combined_test_3();
-	combined_test_4();
+	//combined_test_2();
+	//combined_test_3();
+	//combined_test_4();
 
 	return 0;
 }
