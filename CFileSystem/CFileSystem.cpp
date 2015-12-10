@@ -42,6 +42,7 @@ public:
 		LOG("Initializing file system...")
 
 		next_free_block_id_ = -1;
+		next_free_key_      = -1;
 
 		disk_ptr_ = nullptr;
 
@@ -51,11 +52,13 @@ public:
 	~CFileSystem() {
 		LOG("Destroying file system...")
 
+		if (disk_ptr_ != nullptr) {
+			delete disk_ptr_;
+		}
+
 		for (auto file: files_) {
 			delete file.second;
 		}
-
-		delete disk_ptr_;
 
 		LOG("File system destroyed successfully!\n")
 	}
@@ -75,9 +78,15 @@ public:
 			return 0;
 		}
 
+		if (disk_ptr_ != nullptr) {
+			delete disk_ptr_;
+		}
+
 		disk_ptr_ = new CVirtualDisk(block_size_in_bytes_, disk_size_in_blocks_);
 		free_blocks_ids_ = std::vector<bool>(disk_size_in_blocks_, true);
 		next_free_block_id_ = 0;
+		next_free_key_      = 0;
+
 
 		return 1;
 	}
@@ -236,7 +245,7 @@ public:
 	}
 
 	// 14
-	int read_bakward(file_key_t key) {
+	int read_backward(file_key_t key) {
 		if (has_file_for_key(key) == 0 || system_ready() == 0) {
 			LOG("File not found!")
 			return 0;
@@ -280,6 +289,17 @@ public:
 
 	// 16
 	int end_work() {
+
+		for (auto file: files_) {
+			delete file.second;
+		}
+		files_.clear();
+
+		if (disk_ptr_ != nullptr) {
+			delete disk_ptr_;
+			disk_ptr_ = nullptr;
+		}
+
 		block_size_in_bytes_ = -1;
 		disk_size_in_blocks_ = -1;
 

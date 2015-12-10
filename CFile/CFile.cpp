@@ -180,12 +180,9 @@ public:
 			info_.cursor_pos   = pos + 1;
 		}
 
-		std::cout << "Line from file: " << line << std::endl;
-		std::cout << line.length() << std::endl;
-
  		delete [] block_buffer;
 
- 		return line.length();
+ 		return line.length() - 1;
 	}
 
 	int read_backward() {
@@ -247,12 +244,9 @@ public:
 			info_.cursor_pos   = pos + 1;
 		}
 
-		std::cout << "Line from file: " << line << std::endl;
-		std::cout << line.length() << std::endl;
-
  		delete [] block_buffer;
 
- 		return line.length();
+ 		return line.length() - 1;
 	}
 
 //----------------------------------------------------------------------------------
